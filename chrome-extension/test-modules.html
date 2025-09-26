@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Notes Module Test</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .test-note {
+            position: absolute;
+            background-color: #fff3cd;
+            border: 1px solid rgba(0,0,0,0.2);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 14px;
+            max-width: 200px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 10000;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔧 Web Notes Module Test</h1>
+    <p>This page tests the refactored Web Notes modules to ensure proper functionality.</p>
+
+    <div id="test-results"></div>
+
+    <div class="test-section">
+        <h3>Manual Test Instructions</h3>
+        <ol>
+            <li>Open Chrome Developer Tools (F12)</li>
+            <li>Check Console for any error messages</li>
+            <li>Right-click on text to test context menu</li>
+            <li>Select text and right-click to test note creation</li>
+            <li>Try dragging notes around the page</li>
+            <li>Double-click notes to test editing</li>
+            <li>Test markdown toolbar functionality</li>
+        </ol>
+    </div>
+
+    <div class="test-section">
+        <h3>Sample Text for Testing</h3>
+        <p>This is a paragraph you can select and create notes on.
+           Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+           Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
+
+        <h4>Another Section</h4>
+        <p>Try creating notes anchored to different elements.
+           This paragraph has different content to test text selection
+           and highlighting functionality.</p>
+    </div>
+
+    <!-- Load all modules in the same order as manifest.json -->
+    <script src="libs/marked.min.js"></script>
+    <script src="libs/dompurify.min.js"></script>
+    <script src="color-utils.js"></script>
+    <script src="color-dropdown.js"></script>
+    <script src="markdown-utils.js"></script>
+    <script src="shared-utils.js"></script>
+    <script src="selection-manager.js"></script>
+    <script src="dom-selectors.js"></script>
+    <script src="note-positioning.js"></script>
+    <script src="note-editing.js"></script>
+    <script src="note-dragging.js"></script>
+    <script src="url-monitor.js"></script>
+    <script src="note-display.js"></script>
+    <script src="content-main.js"></script>
+
+    <script>
+        // Module testing functions
+        function runModuleTests() {
+            const results = document.getElementById('test-results');
+            const tests = [];
+
+            // Test 1: Check if all modules are loaded
+            const requiredModules = [
+                'SelectionManager',
+                'DOMSelectors',
+                'NotePositioning',
+                'NoteEditing',
+                'NoteDragging',
+                'URLMonitor',
+                'NoteDisplay',
+                'WebNotesMain'
+            ];
+
+            const moduleTest = {
+                name: 'Module Loading Test',
+                success: true,
+                details: []
+            };
+
+            for (const moduleName of requiredModules) {
+                if (window[moduleName]) {
+                    moduleTest.details.push(`✅ ${moduleName} loaded successfully`);
+                } else {
+                    moduleTest.success = false;
+                    moduleTest.details.push(`❌ ${moduleName} not found`);
+                }
+            }
+            tests.push(moduleTest);
+
+            // Test 2: Check SelectionManager functions
+            const selectionTest = {
+                name: 'SelectionManager Functions Test',
+                success: true,
+                details: []
+            };
+
+            try {
+                const testColor = window.SelectionManager.sanitizeColor('#ff0000');
+                if (testColor === '#ff0000') {
+                    selectionTest.details.push('✅ Color sanitization works');
+                } else {
+                    selectionTest.success = false;
+                    selectionTest.details.push('❌ Color sanitization failed');
+                }
+            } catch (error) {
+                selectionTest.success = false;
+                selectionTest.details.push(`❌ SelectionManager error: ${error.message}`);
+            }
+            tests.push(selectionTest);
+
+            // Test 3: Check DOMSelectors functions
+            const domTest = {
+                name: 'DOMSelectors Functions Test',
+                success: true,
+                details: []
+            };
+
+            try {
+                const testElement = document.body;
+                const selectors = window.DOMSelectors.generateOptimalSelector(testElement);
+                if (selectors && (selectors.css || selectors.xpath)) {
+                    domTest.details.push('✅ Selector generation works');
+                } else {
+                    domTest.success = false;
+                    domTest.details.push('❌ Selector generation failed');
+                }
+            } catch (error) {
+                domTest.success = false;
+                domTest.details.push(`❌ DOMSelectors error: ${error.message}`);
+            }
+            tests.push(domTest);
+
+            // Test 4: Check URLMonitor functions
+            const urlTest = {
+                name: 'URLMonitor Functions Test',
+                success: true,
+                details: []
+            };
+
+            try {
+                const currentUrl = window.URLMonitor.getCurrentUrl();
+                if (typeof currentUrl === 'string') {
+                    urlTest.details.push('✅ URL monitoring initialization works');
+                } else {
+                    urlTest.success = false;
+                    urlTest.details.push('❌ URL monitoring failed');
+                }
+            } catch (error) {
+                urlTest.success = false;
+                urlTest.details.push(`❌ URLMonitor error: ${error.message}`);
+            }
+            tests.push(urlTest);
+
+            // Render test results
+            let html = '<h2>🧪 Module Test Results</h2>';
+
+            tests.forEach(test => {
+                const className = test.success ? 'success' : 'error';
+                html += `
+                    <div class="test-section ${className}">
+                        <h3>${test.name} ${test.success ? '✅' : '❌'}</h3>
+                        <ul>
+                            ${test.details.map(detail => `<li>${detail}</li>`).join('')}
+                        </ul>
+                    </div>
+                `;
+            });
+
+            // Add extension status if available
+            if (window.WebNotesMain && window.WebNotesMain.getExtensionStatus) {
+                try {
+                    const status = window.WebNotesMain.getExtensionStatus();
+                    html += `
+                        <div class="test-section">
+                            <h3>📊 Extension Status</h3>
+                            <pre>${JSON.stringify(status, null, 2)}</pre>
+                        </div>
+                    `;
+                } catch (error) {
+                    console.error('Error getting extension status:', error);
+                }
+            }
+
+            results.innerHTML = html;
+        }
+
+        // Mock chrome extension APIs for testing
+        if (typeof chrome === 'undefined') {
+            window.chrome = {
+                runtime: {
+                    onMessage: {
+                        addListener: () => {},
+                        removeListener: () => {},
+                        hasListener: () => false
+                    },
+                    lastError: null
+                },
+                storage: {
+                    local: {
+                        get: (keys, callback) => {
+                            setTimeout(() => callback({}), 10);
+                        },
+                        set: (data, callback) => {
+                            setTimeout(() => callback && callback(), 10);
+                        }
+                    }
+                }
+            };
+        }
+
+        // Mock shared utility functions
+        if (typeof getNotes === 'undefined') {
+            window.getNotes = async () => ({});
+            window.addNote = async () => true;
+            window.updateNote = async () => true;
+            window.deleteNote = async () => true;
+            window.getNotesForUrl = () => [];
+            window.normalizeUrlForNoteStorage = (url) => url;
+        }
+
+        // Mock TIMING constant if not available
+        if (typeof TIMING === 'undefined') {
+            window.TIMING = {
+                DOM_UPDATE_DELAY: 100,
+                FADE_ANIMATION_DELAY: 250,
+                RESIZE_DEBOUNCE: 300,
+                AUTOSAVE_DELAY: 1000,
+                DOUBLE_CLICK_DELAY: 300
+            };
+        }
+
+        // Run tests when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(runModuleTests, 500); // Give modules time to initialize
+        });
+
+        // Add some console logging for debugging
+        console.log('Web Notes Module Test Page Loaded');
+        console.log('Available modules:', Object.keys(window).filter(key =>
+            ['SelectionManager', 'DOMSelectors', 'NotePositioning', 'NoteEditing',
+             'NoteDragging', 'URLMonitor', 'NoteDisplay', 'WebNotesMain'].includes(key)
+        ));
+    </script>
+</body>
+</html>
